@@ -8,7 +8,7 @@ import {
   walletPkh,
   MEMBERSHIP_POLICY_ID,
   refreshMembershipUI
-} from "./depo.js";
+} from "./app.js";
 
 /* =====================================================
    POLICY
