@@ -20,11 +20,7 @@
       --shadow: rgba(0, 0, 0, 0.1);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Outfit', sans-serif;
@@ -36,10 +32,8 @@
     /* ANIMATED BACKGROUND */
     .bg-animation {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       z-index: -1;
       opacity: 0.03;
       overflow: hidden;
@@ -77,14 +71,8 @@
     }
 
     @keyframes slideDown {
-      from {
-        transform: translateY(-100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+      from { transform: translateY(-100%); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
     }
 
     .header-content {
@@ -139,14 +127,8 @@
     }
 
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .hero-title {
@@ -466,11 +448,11 @@
       font-size: 0.9rem;
       margin-top: 2rem;
       border: 2px solid var(--primary-green);
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
-    .hidden {
-      display: none !important;
-    }
+    .hidden { display: none !important; }
 
     /* BACK BUTTON */
     .back-btn {
@@ -540,6 +522,7 @@
       justify-content: space-between;
       align-items: center;
       transition: all 0.3s ease;
+      gap: 1rem;
     }
 
     .claim-card:hover {
@@ -557,15 +540,9 @@
       box-shadow: 0 4px 15px rgba(220, 38, 38, 0.2);
     }
 
-    .claim-info {
-      flex: 1;
-      line-height: 1.8;
-    }
+    .claim-info { flex: 1; line-height: 1.8; }
 
-    .claim-info strong {
-      color: var(--dark);
-      font-weight: 700;
-    }
+    .claim-info strong { color: var(--dark); font-weight: 700; }
 
     .claim-info code {
       background: var(--white);
@@ -576,14 +553,7 @@
       font-family: 'Courier New', monospace;
     }
 
-    .claim-card button {
-      margin: 0;
-      white-space: nowrap;
-    }
-
-    .claims-container {
-      margin-top: 2rem;
-    }
+    .claims-container { margin-top: 2rem; }
 
     .claims-container p {
       color: var(--gray);
@@ -595,33 +565,56 @@
       border: 2px dashed var(--light-gray);
     }
 
+    /* ✅ NEW: small doc preview block inside claim cards */
+    .doc-preview {
+      margin-top: 0.8rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .doc-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      background: var(--white);
+      border: 2px solid var(--light-gray);
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
+    .nft-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.9rem;
+      border-radius: 999px;
+      border: 2px solid var(--primary-green);
+      color: var(--primary-green);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.25s ease;
+      background: transparent;
+    }
+
+    .nft-link:hover {
+      background: var(--primary-green);
+      color: var(--white);
+      transform: translateY(-1px);
+    }
+
+    .muted { color: var(--gray); }
+
     @media (max-width: 768px) {
-      .hero-title {
-        font-size: 3rem;
-      }
-
-      .hero-subtitle {
-        font-size: 1.1rem;
-      }
-
-      .features {
-        grid-template-columns: 1fr;
-      }
-
-      .header-content {
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .claim-card {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: stretch;
-      }
-
-      .claim-card button {
-        width: 100%;
-      }
+      .hero-title { font-size: 3rem; }
+      .hero-subtitle { font-size: 1.1rem; }
+      .features { grid-template-columns: 1fr; }
+      .header-content { flex-direction: column; gap: 1rem; }
+      .claim-card { flex-direction: column; align-items: stretch; }
+      .claim-card button { width: 100%; }
     }
   </style>
 </head>
@@ -692,6 +685,15 @@
       </div>
 
       <div class="feature-card">
+        <div class="feature-icon">🏧</div>
+        <h3 class="feature-title">Withdraw</h3>
+        <p class="feature-desc">
+          Burn your POOLSHARE tokens to withdraw your proportional ADA from the pool.
+        </p>
+        <button class="feature-btn" onclick="showSection('withdraw')">Withdraw</button>
+      </div>
+
+      <div class="feature-card">
         <div class="feature-icon">📝</div>
         <h3 class="feature-title">Submit Claim</h3>
         <p class="feature-desc">
@@ -732,6 +734,20 @@
     <pre id="log"></pre>
   </section>
 
+  <!-- WITHDRAW SECTION -->
+  <section id="withdraw-section" class="protocol-section hidden">
+    <button class="back-btn" onclick="showHomepage()">← Back to Home</button>
+    <h2>🏧 Withdraw from Pool</h2>
+    <p style="color: var(--gray); margin-bottom: 1rem;">
+      Your Share Balance: <strong id="shareBalance">--</strong>
+    </p>
+
+    <input id="withdrawShares" placeholder="Enter Shares to Burn (e.g., 5)" />
+    <button class="purple" onclick="withdrawFromPool()">Withdraw</button>
+
+    <pre id="log"></pre>
+  </section>
+
   <!-- CLAIM SECTION -->
   <section id="claim-section" class="protocol-section hidden">
     <button class="back-btn" onclick="showHomepage()">← Back to Home</button>
@@ -739,8 +755,23 @@
     <p style="color: var(--gray); margin-bottom: 2rem;">
       File your claim and meet the required vote threshold for approval.
     </p>
+
     <input id="claimAmount" placeholder="Claim Amount (ADA)" />
     <input id="threshold" placeholder="Vote Threshold set to 2" readonly style="background:#eee; cursor:not-allowed;"/>
+
+    <!-- ✅ NEW: claim doc upload input used by offchain: document.getElementById("claimDocUpload") -->
+    <label style="display:block; margin-top:1rem; color: var(--gray); font-weight:600;">
+      Upload Proof Document (required)
+    </label>
+    <input
+      type="file"
+      id="claimDocUpload"
+      accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.doc,.docx,application/pdf,image/*,text/plain"
+    />
+    <small class="muted" style="display:block; margin-top:0.3rem;">
+      The file will be uploaded to IPFS and minted as a Claim-Doc NFT.
+    </small>
+
     <button class="green" onclick="submitClaim()">Submit Claim</button>
     <pre id="log"></pre>
   </section>
@@ -753,7 +784,6 @@
       Review pending claims and cast your vote to help govern the protocol.
     </p>
     
-    <!-- Claims for voting will be rendered here by JavaScript -->
     <div id="claimsForVoting" class="claims-container">
       <p><em>Loading claims...</em></p>
     </div>
@@ -769,9 +799,14 @@
       Process claims that have reached the required vote threshold.
     </p>
     
-    <!-- Claims for execution will be rendered here by JavaScript -->
     <div id="claimsForExecution" class="claims-container">
       <p><em>Loading claims...</em></p>
+    </div>
+
+    <!-- ✅ NEW: executed claims section so docs render properly after execution -->
+    <h3 style="margin-top:2rem;">🧾 Executed Claims</h3>
+    <div id="claimsExecuted" class="claims-container">
+      <p><em>No executed claims yet...</em></p>
     </div>
     
     <pre id="log"></pre>
@@ -779,43 +814,44 @@
 
   <!-- PROTOCOL (HIDDEN - Original Combined Section) -->
   <section id="protocol" class="hidden">
-    <!-- This section kept for backward compatibility but hidden by default -->
+    <!-- kept for backward compatibility -->
   </section>
 
   <script>
     // Navigation Functions
     function showSection(section) {
-      // Hide homepage
       document.getElementById('homepage').classList.add('hidden');
-      
-      // Hide all sections
+
       document.getElementById('deposit-section').classList.add('hidden');
       document.getElementById('claim-section').classList.add('hidden');
       document.getElementById('vote-section').classList.add('hidden');
       document.getElementById('execute-section').classList.add('hidden');
-      
-      // Show selected section
+      document.getElementById('withdraw-section').classList.add('hidden');
+
       document.getElementById(section + '-section').classList.remove('hidden');
-      
-      // Scroll to top
+
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // ✅ NEW: when user opens vote/execute sections, refresh claims so doc preview links show immediately
+      try {
+        if (section === 'vote' || section === 'execute') {
+          if (typeof window.loadClaims === "function") window.loadClaims();
+        }
+      } catch {}
     }
 
     function showHomepage() {
-      // Hide all sections
       document.getElementById('deposit-section').classList.add('hidden');
       document.getElementById('claim-section').classList.add('hidden');
       document.getElementById('vote-section').classList.add('hidden');
       document.getElementById('execute-section').classList.add('hidden');
-      
-      // Show homepage
+      document.getElementById('withdraw-section').classList.add('hidden');
+
       document.getElementById('homepage').classList.remove('hidden');
-      
-      // Scroll to top
+
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // This will be called by your existing scripts
     function showMembershipGate() {
       document.getElementById('homepage').classList.add('hidden');
       document.getElementById('membership').classList.remove('hidden');
@@ -825,10 +861,23 @@
       document.getElementById('membership').classList.add('hidden');
       document.getElementById('homepage').classList.remove('hidden');
     }
+
+    // ✅ NEW: simple UX helper: show chosen file name under upload box (doesn't change your logic)
+    document.addEventListener("change", (e) => {
+      const input = e.target;
+      if (input && input.id === "claimDocUpload") {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        const logEl = document.getElementById("log");
+        if (logEl) {
+          logEl.textContent = `Selected file: ${file.name} (${Math.round(file.size/1024)} KB)\n` + (logEl.textContent || "");
+        }
+      }
+    });
   </script>
 
   <!-- ORDER MATTERS -->
-  <script type="module" src="depo.js"></script>
+  <script type="module" src="app.js"></script>
   <script type="module" src="mint.js"></script>
 </body>
 </html>
