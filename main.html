@@ -656,22 +656,38 @@
     <!-- STATS -->
     <div class="stats-bar">
       <div class="stat">
-        <div class="stat-value">$2.4M</div>
-        <div class="stat-label">Total Value Locked</div>
+        <div class="stat-value" id="stat-total-pool">--</div>
+        <div class="stat-label">Total Pool Deposited (₳)</div>
       </div>
       <div class="stat">
-        <div class="stat-value">1,247</div>
-        <div class="stat-label">Active Members</div>
+        <div class="stat-value" id="stat-total-withdrawn">--</div>
+        <div class="stat-label">Total Withdrawn (₳)</div>
       </div>
       <div class="stat">
-        <div class="stat-value">89</div>
-        <div class="stat-label">Claims Processed</div>
+        <div class="stat-value" id="stat-claims-submitted">--</div>
+        <div class="stat-label">Claims Submitted</div>
       </div>
       <div class="stat">
-        <div class="stat-value">98%</div>
-        <div class="stat-label">Success Rate</div>
+        <div class="stat-value" id="stat-claims-executed">--</div>
+        <div class="stat-label">Claims Executed</div>
       </div>
     </div>
+
+    <section class="protocol-section" style="margin-top: 1rem;">
+      <h2>Recent Transactions</h2>
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th align="left">Action</th><th align="left">TX</th><th align="left">Amount (lovelace)</th><th align="left">Status</th>
+          </tr>
+        </thead>
+        <tbody id="recentTxBody"><tr><td colspan="4"><em>No transactions yet.</em></td></tr></tbody>
+      </table>
+      <h3 style="margin-top:1rem;">Wallet Transaction Lookup</h3>
+      <input id="historyWalletInput" placeholder="Paste wallet address" />
+      <button class="feature-btn" onclick="lookupWalletHistory()">Lookup</button>
+      <pre id="walletHistoryOutput"></pre>
+    </section>
 
     <!-- FEATURES -->
     <div class="features">
