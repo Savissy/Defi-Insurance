@@ -43,7 +43,25 @@ export async function mintMembership() {
     .addSignerKey(walletPkh)
     .complete();
 
-  await (await tx.sign().complete()).submit();
+  const txHash = await (await tx.sign().complete()).submit();
+
+  try {
+    await fetch('/log_tx.php', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tx_hash: txHash,
+        action_type: 'mint_membership_sbt',
+        actor_wallet_address: await lucid.wallet.address(),
+        reference_id: unit,
+        asset_unit: unit,
+        status: 'submitted'
+      })
+    });
+  } catch (e) {
+    console.warn('mint tx logging failed', e);
+  }
 
   await refreshMembershipUI(); // 🔥 THIS FIXES YOUR PROBLEM
 }
