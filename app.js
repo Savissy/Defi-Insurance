@@ -138,6 +138,114 @@ function log(msg) {
   console.log(msg);
 }
 
+
+
+async function backendGet(url) {
+  const res = await fetch(url, { credentials: "include" });
+  if (!res.ok) throw new Error(`Backend request failed: ${res.status}`);
+  return res.json();
+}
+
+async function backendPost(url, payload) {
+  const res = await fetch(url, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.ok === false) {
+    throw new Error(data.error || `Backend request failed: ${res.status}`);
+  }
+  return data;
+}
+
+async function ensureRegisteredWalletOrFail(address) {
+  const data = await backendGet(`/wallet_status.php?address=${encodeURIComponent(address)}`);
+  if (!data.can_use) {
+    alert(`This account is bound to ${data.wallet_address}. Please connect the registered wallet.`);
+    throw new Error("Wrong wallet connected");
+  }
+  return data;
+}
+window.ensureRegisteredWalletOrFail = ensureRegisteredWalletOrFail;
+
+async function bindWalletToAccount() {
+  const challengeResp = await backendGet(`/wallet_challenge.php?address=${encodeURIComponent(walletAddress)}`);
+  const challengeHex = new TextEncoder().encode(atob(challengeResp.challenge));
+  const signed = await window.cardano.lace.signData(walletAddress, challengeHex);
+
+  const bindResp = await backendPost('/wallet_bind.php', {
+    address: walletAddress,
+    challenge: challengeResp.challenge,
+    signature: signed.signature,
+    key: signed.key,
+  });
+
+  if (bindResp.first_bind) {
+    alert('Wallet linked to your account successfully.');
+  }
+  return bindResp;
+}
+window.bindWalletToAccount = bindWalletToAccount;
+
+async function logBackendTx(payload) {
+  try {
+    await backendPost('/log_tx.php', payload);
+  } catch (e) {
+    console.warn('tx log failed', e);
+  }
+}
+
+async function loadStats() {
+  try {
+    const data = await backendGet('/stats.php');
+    const s = data.stats || {};
+    const ada = (v) => (Number(v || 0) / 1_000_000).toLocaleString();
+    const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+    set('stat-total-pool', ada(s.total_pool_deposited));
+    set('stat-total-withdrawn', ada(s.total_withdrawn));
+    set('stat-claims-submitted', String(s.total_claims_submitted || 0));
+    set('stat-claims-executed', String(s.total_claims_executed || 0));
+  } catch (e) {
+    console.warn('stats load failed', e);
+  }
+}
+
+async function loadRecentTransactions() {
+  try {
+    const data = await backendGet('/recent_transactions.php?limit=10');
+    const body = document.getElementById('recentTxBody');
+    if (!body) return;
+    const rows = data.transactions || [];
+    body.innerHTML = rows.length
+      ? rows.map((r) => `<tr><td>${r.action_type}</td><td>${(r.tx_hash || '').slice(0,18)}...</td><td>${r.amount_lovelace || ''}</td><td>${r.status || ''}</td></tr>`).join('')
+      : '<tr><td colspan="4"><em>No transactions yet.</em></td></tr>';
+  } catch (e) {
+    console.warn('recent transactions failed', e);
+  }
+}
+
+async function lookupWalletHistory() {
+  const input = document.getElementById('historyWalletInput');
+  const output = document.getElementById('walletHistoryOutput');
+  if (!input || !output) return;
+  const address = input.value.trim();
+  if (!address) return;
+
+  try {
+    const data = await backendGet(`/tx_history.php?address=${encodeURIComponent(address)}`);
+    output.textContent = JSON.stringify(data, null, 2);
+  } catch (e) {
+    output.textContent = `Lookup failed: ${e.message}`;
+  }
+}
+window.lookupWalletHistory = lookupWalletHistory;
+
+async function refreshBackendDashboard() {
+  await loadStats();
+  await loadRecentTransactions();
+}
 function ipfsToHttp(url) {
   if (!url) return "";
   return url.startsWith("ipfs://")
@@ -447,7 +555,10 @@ async function init() {
   console.log("DOC_POLICY_ID", DOC_POLICY_ID);
   console.log("MEMBERSHIP_POLICY_ID", MEMBERSHIP_POLICY_ID);
 
+  await ensureRegisteredWalletOrFail(walletAddress);
+  await bindWalletToAccount();
   await refreshMembershipUI();
+  await refreshBackendDashboard();
 }
 
 window.init = init;
@@ -493,7 +604,15 @@ async function depositToPool() {
     tx = tx.payToContract(poolAddress, { inline: datum }, { lovelace: amount });
 
     const completed = await tx.addSignerKey(walletPkh).complete();
-    await (await completed.sign().complete()).submit();
+    const initTxHash = await (await completed.sign().complete()).submit();
+
+    await logBackendTx({
+      tx_hash: initTxHash,
+      action_type: "deposit_pool",
+      actor_wallet_address: walletAddress,
+      amount_lovelace: amount.toString(),
+      status: "submitted"
+    });
 
     log("✅ Pool initialized. Shares minting starts from NEXT deposit.");
     await refreshSharesUI();
@@ -536,7 +655,15 @@ async function depositToPool() {
     .addSignerKey(walletPkh);
 
   const completed = await tx.complete();
-  await (await completed.sign().complete()).submit();
+  const txHash = await (await completed.sign().complete()).submit();
+
+  await logBackendTx({
+    tx_hash: txHash,
+    action_type: "deposit_pool",
+    actor_wallet_address: walletAddress,
+    amount_lovelace: amount.toString(),
+    status: "submitted"
+  });
 
   log(`✅ Deposit successful. Minted ${sharesToMint.toString()} POOLSHARE`);
   await refreshSharesUI();
@@ -621,8 +748,19 @@ export async function submitClaim() {
   const signed = await tx.sign().complete();
   const txHash = await signed.submit();
 
+  await logBackendTx({
+    tx_hash: txHash,
+    action_type: "submit_claim",
+    reference_id: docUnit,
+    actor_wallet_address: walletAddress,
+    amount_lovelace: claimAmount.toString(),
+    asset_unit: docUnit,
+    status: "submitted"
+  });
+
   log("✅ Claim submitted with doc. TX: " + txHash + " | Verify: " + httpUrl);
   await loadClaims();
+  await refreshBackendDashboard();
 }
 
 window.submitClaim = submitClaim;
@@ -662,7 +800,15 @@ async function voteForClaim(index) {
     .complete();
 
   const signed = await tx.sign().complete();
-  await signed.submit();
+  const txHash = await signed.submit();
+
+  await logBackendTx({
+    tx_hash: txHash,
+    action_type: "vote_claim",
+    reference_id: String(index),
+    actor_wallet_address: walletAddress,
+    status: "submitted"
+  });
 
   log("✅ Vote submitted");
   await loadClaims();
@@ -739,8 +885,18 @@ async function withdrawFromPool() {
   const signed = await tx.sign().complete();
   const txHash = await signed.submit();
 
+  await logBackendTx({
+    tx_hash: txHash,
+    action_type: "withdraw_shares",
+    actor_wallet_address: walletAddress,
+    amount_lovelace: withdrawLovelace.toString(),
+    asset_unit: SHARE_UNIT,
+    status: "submitted"
+  });
+
   log(`✅ Withdraw successful. Burned ${shares.toString()} shares. TX: ${txHash}`);
   await refreshSharesUI();
+  await refreshBackendDashboard();
 }
 
 window.withdrawFromPool = withdrawFromPool;
@@ -852,8 +1008,19 @@ async function executeClaimByIndex(index) {
   const signed = await tx.sign().complete();
   const txHash = await signed.submit();
 
+  await logBackendTx({
+    tx_hash: txHash,
+    action_type: "execute_claim",
+    reference_id: docUnit,
+    actor_wallet_address: walletAddress,
+    counterparty_wallet_address: claimerAddr,
+    amount_lovelace: claimLovelace.toString(),
+    status: "submitted"
+  });
+
   log("✅ Claim executed. TX: " + txHash);
   await loadClaims();
+  await refreshBackendDashboard();
 }
 
 window.executeClaimByIndex = executeClaimByIndex;
