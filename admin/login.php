@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/../auth.php';
 require_once __DIR__ . '/../csrf.php';
-require_once __DIR__ . '/../ui.php';
 
 start_secure_session();
 if (($u = current_user()) && is_admin($u)) {
@@ -26,14 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/admin/index.php');
     }
 }
-
-render_page_start('Admin Login', 'Sign in with an allowlisted admin account.');
-if ($error) echo '<div class="alert error">' . h($error) . '</div>';
 ?>
-<form method="post" class="form-grid">
-  <?=csrf_input()?>
-  <label>Email</label><input type="email" name="email" required>
-  <label>Password</label><input type="password" name="password" required>
-  <button class="btn" type="submit">Login</button>
+<!doctype html><html><body>
+<h2>Admin Login</h2>
+<?php if ($error): ?><p style="color:red;"><?=h($error)?></p><?php endif; ?>
+<form method="post"><?=csrf_input()?>
+  <input type="email" name="email" required>
+  <input type="password" name="password" required>
+  <button type="submit">Login</button>
 </form>
-<?php render_page_end(); ?>
+</body></html>

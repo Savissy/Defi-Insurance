@@ -1,7 +1,5 @@
 <?php
 require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/ui.php';
-
 $user = require_auth();
 
 if (!is_email_verified($user)) {
@@ -15,23 +13,21 @@ $kyc = $stmt->fetch();
 if ($kyc && $kyc['status'] === 'approved') {
     redirect('/main.html');
 }
-
-render_page_start('KYC Status', 'Track your onboarding approval progress.', [
-    ['href' => '/kyc.php', 'label' => 'Submit / Resubmit KYC'],
-    ['href' => '/logout.php', 'label' => 'Logout']
-]);
-
-if (!$kyc) {
-    echo '<div class="alert info">No KYC submission found yet.</div>';
-} else {
-    echo '<p>Status: <span class="badge ' . h($kyc['status']) . '">' . h($kyc['status']) . '</span></p>';
-    if (!empty($kyc['admin_notes'])) {
-        echo '<div class="alert info">Admin Notes: ' . h($kyc['admin_notes']) . '</div>';
-    }
-    if ($kyc['status'] === 'rejected') {
-        echo '<div class="alert error">Your KYC was rejected. Please update details and resubmit.</div>';
-    } else {
-        echo '<div class="alert info">Your KYC is under review.</div>';
-    }
-}
-render_page_end();
+?>
+<!doctype html><html><body>
+<h2>KYC Status</h2>
+<?php if (!$kyc): ?>
+  <p>No KYC submission found.</p>
+  <p><a href="/kyc.php">Submit KYC</a></p>
+<?php else: ?>
+  <p>Status: <strong><?=h($kyc['status'])?></strong></p>
+  <?php if (!empty($kyc['admin_notes'])): ?><p>Admin Notes: <?=h($kyc['admin_notes'])?></p><?php endif; ?>
+  <?php if ($kyc['status'] === 'rejected'): ?>
+    <p>Your KYC was rejected. Please resubmit.</p>
+    <p><a href="/kyc.php">Resubmit KYC</a></p>
+  <?php else: ?>
+    <p>Your KYC is under review.</p>
+  <?php endif; ?>
+<?php endif; ?>
+<p><a href="/logout.php">Logout</a></p>
+</body></html>

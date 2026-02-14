@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/csrf.php';
-require_once __DIR__ . '/ui.php';
 
 start_secure_session();
 
@@ -29,19 +28,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Unexpected error. Try again.';
     }
 }
-
-render_page_start('Login', 'Access your Insurance Finance dashboard.');
-if ($error) echo '<div class="alert error">' . h($error) . '</div>';
 ?>
-<form method="post" class="form-grid">
+<!doctype html><html><body>
+<h2>Login</h2>
+<?php if ($error): ?><p style="color:red;"><?=h($error)?></p><?php endif; ?>
+<form method="post">
   <?=csrf_input()?>
-  <label>Email</label>
-  <input type="email" name="email" placeholder="you@example.com" required>
-  <label>Password</label>
-  <input type="password" name="password" placeholder="••••••••" required>
-  <div class="actions">
-    <button class="btn" type="submit">Login</button>
-    <a class="btn secondary" href="<?=h(app_path('/register.php'))?>">Create account</a>
-  </div>
+  <input type="email" name="email" placeholder="Email" required>
+  <input type="password" name="password" placeholder="Password" required>
+  <button type="submit">Login</button>
 </form>
-<?php render_page_end(); ?>
+<p><a href="/register.php">Register</a></p>
+</body></html>

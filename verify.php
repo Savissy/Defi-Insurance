@@ -1,11 +1,9 @@
 <?php
 require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/ui.php';
 
 start_secure_session();
 $token = (string)($_GET['token'] ?? '');
 $message = 'Invalid or expired token.';
-$ok = false;
 
 if ($token !== '') {
     $hash = hash('sha256', $token);
@@ -27,9 +25,9 @@ if ($token !== '') {
         $message = 'Unexpected error while verifying.';
     }
 }
-
-render_page_start('Email Verification');
 ?>
-<div class="alert <?= $ok ? 'success' : 'error' ?>"><?=h($message)?></div>
-<div class="actions"><a class="btn secondary" href="<?=h(app_path('/login.php'))?>">Go to login</a></div>
-<?php render_page_end(); ?>
+<!doctype html><html><body>
+<h2>Email Verification</h2>
+<p><?=h($message)?></p>
+<p><a href="/login.php">Go to login</a></p>
+</body></html>

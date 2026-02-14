@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../auth.php';
-require_once __DIR__ . '/../ui.php';
 require_admin();
 
 $address = trim((string)($_GET['address'] ?? ''));
@@ -12,23 +11,16 @@ if ($address !== '') {
     $stmt->execute(['hash' => $hash]);
     $result = $stmt->fetch();
 }
-
-render_page_start('Wallet Lookup', 'Find user account details by bound wallet.', [
-    ['href' => '/admin/index.php', 'label' => 'Back to Dashboard']
-]);
 ?>
-<form method="get" class="form-grid">
-  <label>Wallet Address</label>
-  <input name="address" placeholder="addr1..." value="<?=h($address)?>">
-  <button class="btn" type="submit">Lookup</button>
-</form>
-
+<!doctype html><html><body>
+<h2>Wallet Lookup</h2>
+<form method="get"><input name="address" placeholder="addr1..." value="<?=h($address)?>"><button>Lookup</button></form>
 <?php if ($address !== ''): ?>
   <?php if ($result): ?>
-    <h3>Result</h3>
-    <pre class="mono"><?=h(json_encode($result, JSON_PRETTY_PRINT))?></pre>
+    <pre><?=h(json_encode($result, JSON_PRETTY_PRINT))?></pre>
   <?php else: ?>
-    <div class="alert info">No bound user found for this wallet.</div>
+    <p>No bound user found for this wallet.</p>
   <?php endif; ?>
 <?php endif; ?>
-<?php render_page_end(); ?>
+<p><a href="/admin/index.php">Back</a></p>
+</body></html>

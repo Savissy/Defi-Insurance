@@ -33,28 +33,8 @@ function start_secure_session(): void
 
 function redirect(string $path): void
 {
-    header('Location: ' . app_path($path));
+    header('Location: ' . $path);
     exit;
-}
-
-function app_base_path(): string
-{
-    $raw = parse_url(app_config()['app']['url'] ?? '', PHP_URL_PATH);
-    $base = is_string($raw) ? trim($raw) : '';
-    if ($base === '' || $base === '/') {
-        return '';
-    }
-    return '/' . trim($base, '/');
-}
-
-function app_path(string $path = ''): string
-{
-    $base = app_base_path();
-    $clean = '/' . ltrim($path, '/');
-    if ($clean === '/') {
-        return $base === '' ? '/' : $base . '/';
-    }
-    return $base . $clean;
 }
 
 function h(?string $value): string

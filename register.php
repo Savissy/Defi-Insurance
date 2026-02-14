@@ -2,7 +2,6 @@
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/csrf.php';
-require_once __DIR__ . '/ui.php';
 
 start_secure_session();
 
@@ -48,20 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
-render_page_start('Create Account', 'Register your Insurance Finance account.');
-if ($message) echo '<div class="alert success">' . h($message) . '</div>';
-if ($error) echo '<div class="alert error">' . h($error) . '</div>';
 ?>
-<form method="post" class="form-grid">
+<!doctype html><html><body>
+<h2>Register</h2>
+<?php if ($message): ?><p style="color:green;"><?=h($message)?></p><?php endif; ?>
+<?php if ($error): ?><p style="color:red;"><?=h($error)?></p><?php endif; ?>
+<form method="post">
   <?=csrf_input()?>
-  <label>Email</label>
-  <input type="email" name="email" placeholder="you@example.com" required>
-  <label>Password</label>
-  <input type="password" name="password" placeholder="Minimum 8 characters" required minlength="8">
-  <div class="actions">
-    <button class="btn" type="submit">Create Account</button>
-    <a class="btn secondary" href="<?=h(app_path('/login.php'))?>">Already have an account? Login</a>
-  </div>
+  <input type="email" name="email" placeholder="Email" required>
+  <input type="password" name="password" placeholder="Password" required minlength="8">
+  <button type="submit">Create Account</button>
 </form>
-<?php render_page_end(); ?>
+<p><a href="/login.php">Login</a></p>
+</body></html>

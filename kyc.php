@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/csrf.php';
-require_once __DIR__ . '/ui.php';
 
 $user = require_auth();
 if (!is_email_verified($user)) {
@@ -83,22 +82,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
-render_page_start('KYC Submission', 'Complete onboarding to unlock dApp access.', [
-    ['href' => '/kyc_status.php', 'label' => 'View Status'],
-    ['href' => '/logout.php', 'label' => 'Logout']
-]);
-if ($message) echo '<div class="alert success">' . h($message) . '</div>';
-if ($error) echo '<div class="alert error">' . h($error) . '</div>';
 ?>
-<form method="post" enctype="multipart/form-data" class="form-grid">
+<!doctype html><html><body>
+<h2>KYC Submission</h2>
+<?php if ($message): ?><p style="color:green;"><?=h($message)?></p><?php endif; ?>
+<?php if ($error): ?><p style="color:red;"><?=h($error)?></p><?php endif; ?>
+<form method="post" enctype="multipart/form-data">
   <?=csrf_input()?>
-  <label>Full Name</label><input name="full_name" required>
-  <label>Phone Number</label><input name="phone_number" required>
-  <label>Country</label><input name="country" required>
-  <label>Business Name (optional)</label><input name="business_name">
-  <label>ID/Proof Document (PDF/JPG/PNG, max 5MB)</label>
+  <input name="full_name" placeholder="Full Name" required>
+  <input name="phone_number" placeholder="Phone Number" required>
+  <input name="country" placeholder="Country" required>
+  <input name="business_name" placeholder="Business Name (optional)">
   <input type="file" name="id_document" accept="application/pdf,image/png,image/jpeg" required>
-  <button class="btn" type="submit">Submit KYC</button>
+  <button type="submit">Submit KYC</button>
 </form>
-<?php render_page_end(); ?>
+<p><a href="/kyc_status.php">Check status</a></p>
+</body></html>
